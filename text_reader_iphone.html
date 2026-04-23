@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Text Reader iPhone</title>
+  <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=F2SgIWo23Y5HD8ABhnUAqHOgbWfwT9iOGq56m8UJkR9a395QRvuMWRzrKevqJGxSBFwSGwe2TADnbxz5eFH2_yVKZ_qZYtFLscZ4G3uLd0sYsvjR2sI-mnlOoFHNhgRsRIOFBABVOJszVM9cDtqHaiMxwEAE2zAoISRckTNBKbAPjUlECay1NE87vp8ZjpUJjLYwUmgod1GlYXsqDlmvDMj7eOGgZosebmJILkOxppq5fBovhIWgLgcVqd8-FRhGR_hgHRAAp_iSWooKUW29_A" charset="UTF-8"></script><style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --primary:#2563eb;
+      --primary-2:#1d4ed8;
+      --danger:#dc2626;
+      --ok:#059669;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+    }
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:16px 14px 120px;
+    }
+    .title{
+      font-size:28px;
+      font-weight:800;
+      margin:8px 0 6px;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:14px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      margin-bottom:14px;
+    }
+    textarea{
+      width:100%;
+      min-height:220px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      font-size:17px;
+      line-height:1.55;
+      resize:vertical;
+      outline:none;
+    }
+    textarea:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+    .toolbar{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (min-width:700px){
+      .toolbar{grid-template-columns:repeat(5,minmax(0,1fr));}
+    }
+    button, select, input[type="range"]{
+      width:100%;
+    }
+    button{
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      background:#eef2ff;
+      color:#1e3a8a;
+    }
+    button.primary{background:var(--primary); color:#fff;}
+    button.primary:active{background:var(--primary-2);}
+    button.stop{background:#fee2e2; color:#991b1b;}
+    button.ok{background:#d1fae5; color:#065f46;}
+    .row{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (min-width:700px){
+      .row{grid-template-columns:1.2fr .8fr;}
+    }
+    .controls{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    .control{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+    }
+    .control label{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      font-size:14px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+    select{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:11px 12px;
+      font-size:16px;
+      background:#fff;
+    }
+    .segments{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .seg{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:12px 13px;
+      font-size:17px;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .seg:hover{transform:translateY(-1px)}
+    .seg.active{
+      border-color:var(--primary);
+      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+      background:#eff6ff;
+    }
+    .seg .meta{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .hint{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:8px;
+    }
+    .sticky{
+      position:sticky;
+      top:0;
+      z-index:10;
+      padding-top:env(safe-area-inset-top);
+      background:linear-gradient(to bottom, rgba(245,247,251,1), rgba(245,247,251,.85), rgba(245,247,251,0));
+      backdrop-filter:saturate(180%) blur(12px);
+    }
+    .status{
+      margin-top:8px;
+      font-size:14px;
+      color:var(--muted);
+    }
+    .footer-space{height:20px;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="sticky">
+      <div class="title">Đọc lớn văn bản</div>
+      <div class="sub">Dán văn bản vào, tách thành đoạn, rồi bấm đúng đoạn bạn muốn nghe trên iPhone.</div>
+    </div>
+
+    <div class="card">
+      <textarea id="inputText" placeholder="Dán văn bản vào đây..."></textarea>
+
+      <div class="toolbar">
+        <button class="primary" id="splitBtn">Tách đoạn</button>
+        <button id="readAllBtn">Đọc từ đầu</button>
+        <button id="repeatBtn">Đọc lại đoạn hiện tại</button>
+        <button class="stop" id="stopBtn">Dừng</button>
+        <button class="ok" id="clearBtn">Xóa</button>
+      </div>
+
+      <div class="row">
+        <div class="controls">
+          <div class="control">
+            <label for="voiceSelect"><span>Giọng đọc</span><span id="voiceCount">Đang tải...</span></label>
+            <select id="voiceSelect"></select>
+          </div>
+
+          <div class="control">
+            <label for="rateRange"><span>Tốc độ</span><strong id="rateValue">1.0x</strong></label>
+            <input id="rateRange" type="range" min="0.5" max="1.5" step="0.05" value="1" />
+          </div>
+
+          <div class="control">
+            <label for="pitchRange"><span>Cao độ</span><strong id="pitchValue">1.0</strong></label>
+            <input id="pitchRange" type="range" min="0.7" max="1.3" step="0.05" value="1" />
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="control">
+            <label for="segmentMode"><span>Kiểu tách</span></label>
+            <select id="segmentMode">
+              <option value="paragraph">Theo đoạn</option>
+              <option value="sentence">Theo câu</option>
+            </select>
+            <div class="hint">Bản iPhone thường dễ dùng nhất với “Theo đoạn”.</div>
+          </div>
+
+          <div class="control">
+            <label><span>Tùy chọn đọc</span></label>
+            <button id="nextBtn">Đọc đoạn tiếp theo</button>
+            <div class="hint">Chạm vào bất kỳ đoạn nào bên dưới để đọc đúng đoạn đó ngay.</div>
+          </div>
+
+          <div class="status" id="status">Sẵn sàng.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800; font-size:18px; margin-bottom:8px;">Danh sách đoạn</div>
+      <div class="segments" id="segments"></div>
+      <div class="hint">Mẹo trên iPhone: mở bằng Safari rồi bấm Chia sẻ → “Add to Home Screen” để dùng như app.</div>
+    </div>
+
+    <div class="footer-space"></div>
+  </div>
+
+  <script>
+    const inputText = document.getElementById('inputText');
+    const splitBtn = document.getElementById('splitBtn');
+    const readAllBtn = document.getElementById('readAllBtn');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const voiceCount = document.getElementById('voiceCount');
+    const rateRange = document.getElementById('rateRange');
+    const pitchRange = document.getElementById('pitchRange');
+    const rateValue = document.getElementById('rateValue');
+    const pitchValue = document.getElementById('pitchValue');
+    const segmentMode = document.getElementById('segmentMode');
+    const segmentsEl = document.getElementById('segments');
+    const statusEl = document.getElementById('status');
+
+    let voices = [];
+    let segments = [];
+    let currentIndex = -1;
+    let speaking = false;
+
+    const sampleText = `Đây là công cụ đọc lớn văn bản trên iPhone.
+
+Bạn có thể dán bất kỳ nội dung nào vào đây.
+
+Sau đó bấm “Tách đoạn”, rồi chạm vào đúng đoạn bạn muốn nghe.
+
+Bạn có thể nghe lại một đoạn bao nhiêu lần tùy thích.`;
+    inputText.value = sampleText;
+
+    function setStatus(msg){
+      statusEl.textContent = msg;
+    }
+
+    function getPreferredVoice() {
+      const selectedName = localStorage.getItem('reader_voice_name');
+      if (selectedName) {
+        const found = voices.find(v => v.name === selectedName);
+        if (found) return found;
+      }
+      const vi = voices.find(v => /vi|vietnam/i.test(v.lang + ' ' + v.name));
+      return vi || voices[0] || null;
+    }
+
+    function saveSettings() {
+      localStorage.setItem('reader_rate', rateRange.value);
+      localStorage.setItem('reader_pitch', pitchRange.value);
+      localStorage.setItem('reader_mode', segmentMode.value);
+      const v = voices[voiceSelect.selectedIndex];
+      if (v) localStorage.setItem('reader_voice_name', v.name);
+      localStorage.setItem('reader_text', inputText.value);
+    }
+
+    function loadSettings() {
+      const savedRate = localStorage.getItem('reader_rate');
+      const savedPitch = localStorage.getItem('reader_pitch');
+      const savedMode = localStorage.getItem('reader_mode');
+      const savedText = localStorage.getItem('reader_text');
+      if (savedRate) rateRange.value = savedRate;
+      if (savedPitch) pitchRange.value = savedPitch;
+      if (savedMode) segmentMode.value = savedMode;
+      if (savedText) inputText.value = savedText;
+      updateSliderLabels();
+    }
+
+    function updateSliderLabels() {
+      rateValue.textContent = Number(rateRange.value).toFixed(2).replace(/\.00$/, '') + 'x';
+      pitchValue.textContent = Number(pitchRange.value).toFixed(2).replace(/\.00$/, '');
+    }
+
+    function loadVoices() {
+      voices = window.speechSynthesis.getVoices().slice().sort((a,b) => {
+        const aVi = /vi/i.test(a.lang) || /vietnam/i.test(a.name);
+        const bVi = /vi/i.test(b.lang) || /vietnam/i.test(b.name);
+        if (aVi && !bVi) return -1;
+        if (!aVi && bVi) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      voiceSelect.innerHTML = '';
+      voices.forEach((voice) => {
+        const opt = document.createElement('option');
+        opt.value = voice.name;
+        opt.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(opt);
+      });
+
+      const preferred = getPreferredVoice();
+      if (preferred) {
+        const idx = voices.findIndex(v => v.name === preferred.name);
+        if (idx >= 0) voiceSelect.selectedIndex = idx;
+      }
+
+      voiceCount.textContent = voices.length ? `${voices.length} giọng` : 'Không thấy giọng';
+    }
+
+    function splitText(text, mode) {
+      const clean = text.replace(/\r/g, '').trim();
+      if (!clean) return [];
+      if (mode === 'sentence') {
+        return clean
+          .replace(/\n+/g, ' ')
+          .match(/[^.!?。！？\n]+[.!?。！？]?/g)
+          ?.map(s => s.trim())
+          .filter(Boolean) || [];
+      }
+      return clean
+        .split(/\n{2,}/)
+        .map(s => s.trim())
+        .filter(Boolean);
+    }
+
+    function renderSegments() {
+      segmentsEl.innerHTML = '';
+      if (!segments.length) {
+        segmentsEl.innerHTML = '<div class="hint">Chưa có đoạn nào. Hãy dán văn bản rồi bấm “Tách đoạn”.</div>';
+        return;
+      }
+
+      segments.forEach((text, index) => {
+        const div = document.createElement('div');
+        div.className = 'seg' + (index === currentIndex ? ' active' : '');
+        div.innerHTML = `
+          <div class="meta">Đoạn ${index + 1}</div>
+          <div>${escapeHtml(text)}</div>
+        `;
+        div.addEventListener('click', () => speakSegment(index));
+        segmentsEl.appendChild(div);
+      });
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    function buildUtterance(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      const voice = voices[voiceSelect.selectedIndex] || getPreferredVoice();
+      if (voice) utter.voice = voice;
+      utter.lang = voice?.lang || 'vi-VN';
+      utter.rate = parseFloat(rateRange.value);
+      utter.pitch = parseFloat(pitchRange.value);
+      utter.onstart = () => {
+        speaking = true;
+        setStatus(`Đang đọc đoạn ${currentIndex + 1}/${segments.length}`);
+        renderSegments();
+      };
+      utter.onend = () => {
+        speaking = false;
+        renderSegments();
+      };
+      utter.onerror = () => {
+        speaking = false;
+        setStatus('Có lỗi khi đọc. Thử bấm lại hoặc đổi giọng.');
+        renderSegments();
+      };
+      return utter;
+    }
+
+    function stopSpeaking() {
+      window.speechSynthesis.cancel();
+      speaking = false;
+      setStatus('Đã dừng.');
+      renderSegments();
+    }
+
+    function speakSegment(index) {
+      if (!segments[index]) return;
+      currentIndex = index;
+      stopSpeaking();
+      // Delay nhẹ để Safari iPhone xử lý cancel ổn định hơn
+      setTimeout(() => {
+        const utter = buildUtterance(segments[index]);
+        window.speechSynthesis.speak(utter);
+      }, 80);
+    }
+
+    function readAllFrom(index = 0) {
+      if (!segments.length) return;
+      currentIndex = index;
+      stopSpeaking();
+
+      const queueSpeak = (i) => {
+        if (i >= segments.length) {
+          speaking = false;
+          setStatus('Đã đọc xong.');
+          renderSegments();
+          return;
+        }
+        currentIndex = i;
+        const utter = buildUtterance(segments[i]);
+        utter.onend = () => {
+          speaking = false;
+          renderSegments();
+          queueSpeak(i + 1);
+        };
+        utter.onstart = () => {
+          speaking = true;
+          setStatus(`Đang đọc đoạn ${i + 1}/${segments.length}`);
+          renderSegments();
+        };
+        utter.onerror = () => {
+          speaking = false;
+          setStatus('Có lỗi khi đọc. Thử lại hoặc đổi giọng.');
+          renderSegments();
+        };
+        window.speechSynthesis.speak(utter);
+      };
+
+      setTimeout(() => queueSpeak(index), 80);
+    }
+
+    splitBtn.addEventListener('click', () => {
+      saveSettings();
+      segments = splitText(inputText.value, segmentMode.value);
+      currentIndex = segments.length ? 0 : -1;
+      renderSegments();
+      setStatus(segments.length ? `Đã tách ${segments.length} đoạn.` : 'Không có nội dung để tách.');
+    });
+
+    readAllBtn.addEventListener('click', () => {
+      if (!segments.length) {
+        segments = splitText(inputText.value, segmentMode.value);
+        renderSegments();
+      }
+      if (!segments.length) return setStatus('Bạn chưa có nội dung để đọc.');
+      readAllFrom(0);
+    });
+
+    repeatBtn.addEventListener('click', () => {
+      if (currentIndex < 0 && segments.length) currentIndex = 0;
+      if (currentIndex < 0) return setStatus('Chưa có đoạn để đọc lại.');
+      speakSegment(currentIndex);
+    });
+
+    stopBtn.addEventListener('click', stopSpeaking);
+
+    nextBtn.addEventListener('click', () => {
+      if (!segments.length) return setStatus('Chưa có đoạn nào.');
+      const next = currentIndex + 1 < segments.length ? currentIndex + 1 : 0;
+      speakSegment(next);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      stopSpeaking();
+      inputText.value = '';
+      segments = [];
+      currentIndex = -1;
+      renderSegments();
+      saveSettings();
+      setStatus('Đã xóa nội dung.');
+    });
+
+    [rateRange, pitchRange, segmentMode, voiceSelect].forEach(el => {
+      el.addEventListener('input', () => {
+        updateSliderLabels();
+        saveSettings();
+      });
+      el.addEventListener('change', () => {
+        updateSliderLabels();
+        saveSettings();
+      });
+    });
+
+    inputText.addEventListener('input', saveSettings);
+
+    if ('speechSynthesis' in window) {
+      loadSettings();
+      loadVoices();
+      renderSegments();
+      setStatus('Sẵn sàng. Nếu chưa thấy giọng, chờ 1 chút rồi thử lại.');
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    } else {
+      setStatus('Trình duyệt này chưa hỗ trợ đọc văn bản.');
+    }
+  </script>
+</body>
+</html>
